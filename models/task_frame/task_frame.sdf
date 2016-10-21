@@ -1,0 +1,76 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="task_frame">
+    <pose>0 0 0.5 0 0 0</pose>
+    <static>false</static>
+    <link name="origin">
+        <gravity>false</gravity>
+        <visual name="visual">
+            <transparency>0.4</transparency>
+            <geometry>
+                  <box>
+                      <size>0.02 0.02 0.02</size>
+                  </box>
+            </geometry>
+        </visual>
+    </link>
+    <link name="x_axis">
+        <gravity>false</gravity>
+        <visual name="visual">
+            <pose>0.03 0.0 0.0 0.0 1.57 0.0</pose>
+            <transparency>0.4</transparency>
+            <geometry>
+                  <cylinder>
+                      <length>0.04</length>
+                      <radius>0.005</radius>
+                  </cylinder>
+            </geometry>
+            <material>
+                <ambient>1 0 0 1</ambient>
+                <diffuse>1 0 0 1</diffuse>
+                <specular>0.1 0.1 0.1 1</specular>
+                <emissive>0 0 0 0</emissive>
+            </material>
+        </visual>
+    </link>
+    <link name="y_axis">
+        <gravity>false</gravity>
+        <visual name="visual">
+            <pose>0.0 0.03 0.0 1.57 0.0 0.0</pose>
+            <transparency>0.4</transparency>
+            <geometry>
+                  <cylinder>
+                      <length>0.04</length>
+                      <radius>0.005</radius>
+                  </cylinder>
+            </geometry>
+            <material>
+                <ambient>0 1 0 1</ambient>
+                <diffuse>0 1 0 1</diffuse>
+                <specular>0.1 0.1 0.1 1</specular>
+                <emissive>0 0 0 0</emissive>
+            </material>
+        </visual>
+    </link>
+    <link name="z_axis">
+        <gravity>false</gravity>
+        <visual name="visual">
+            <pose>0.0 0.0 0.03 0.0 0.0 0.0</pose>
+            <transparency>0.4</transparency>
+            <geometry>
+                  <cylinder>
+                      <length>0.04</length>
+                      <radius>0.005</radius>
+                  </cylinder>
+            </geometry>
+            <material>
+                <ambient>0 0 1 1</ambient>
+                <diffuse>0 0 1 1</diffuse>
+                <specular>0.1 0.1 0.1 1</specular>
+                <emissive>0 0 0 0</emissive>
+            </material>
+        </visual>
+    </link>
+    <plugin name="yarp_model_move" filename="libyarp_model_move.so"/>
+</model>
+</sdf>

@@ -1,0 +1,1 @@
+add_subdirectory(test_yarp_move_plugin)

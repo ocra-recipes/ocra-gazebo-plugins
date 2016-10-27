@@ -25,7 +25,7 @@ namespace gazebo
 class GAZEBO_VISIBLE OcraTaskWidget : public GUIPlugin
 {
     Q_OBJECT
-    using TaskRelayMap = std::map<std::string, TaskConnectionRelay>;
+    using TaskRelayMap = std::map<std::string, std::shared_ptr<TaskConnectionRelay>>;
     public:
       OcraTaskWidget();
       virtual ~OcraTaskWidget();
@@ -56,11 +56,13 @@ class GAZEBO_VISIBLE OcraTaskWidget : public GUIPlugin
         // ocra_recipes::ClientCommunications clientComs;
         TaskRelayMap taskRelayMap;
         std::vector<std::string> taskNames;
+        std::vector<bool> taskActivationVector;
 
         //GUI Related:
         QLabel *informUserLabel;
         QButtonGroup* taskButtons;
-        QFrame* buttonFrame;
+        // QFrame* buttonFrame;
+        QVBoxLayout *buttonGroupLayout;
         bool tasksDisplayed;
 
 

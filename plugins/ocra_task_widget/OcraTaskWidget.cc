@@ -19,7 +19,7 @@ OcraTaskWidget::~OcraTaskWidget()
 {
     delete informUserLabel;
     delete taskButtons;
-    delete buttonFrame;
+    delete buttonGroupLayout;
 }
 
 void OcraTaskWidget::initializeGui()
@@ -36,6 +36,10 @@ void OcraTaskWidget::initializeGui()
     mainLayout->addLayout(topLayout);
     topLayout->setContentsMargins(0, 0, 0, 0);
 
+    buttonGroupLayout = new QVBoxLayout();
+    mainLayout->addLayout(buttonGroupLayout);
+    topLayout->setContentsMargins(0, 0, 0, 0);
+
     QPushButton *button = new QPushButton(tr("O.C.R.A."));
     button->resize(60, 30);
     connect(button, SIGNAL(clicked()), this, SLOT(OnButton()));
@@ -45,17 +49,14 @@ void OcraTaskWidget::initializeGui()
     topLayout->addWidget(informUserLabel);
     informUserLabel->hide();
 
-    buttonFrame = new QFrame;
-    mainLayout->addWidget(buttonFrame);
-    // QVBoxLayout* buttonFrameLayout = new QVBoxLayout;
 
-    taskButtons = new QButtonGroup(buttonFrame);
-    buttonFrame->hide();
+    taskButtons = new QButtonGroup();
+    connect(taskButtons, SIGNAL(buttonClicked(int)), this, SLOT(addTaskFrames(int)));
 
 
     // Position and resize this widget
     this->move(10, 10);
-    // this->resize(300, 30);
+    // this->resize(300, 60);
     this->setSizePolicy(QSizePolicy(QSizePolicy::Policy::MinimumExpanding,QSizePolicy::Policy::MinimumExpanding) );
 
     // Create a node for transportation
@@ -78,25 +79,27 @@ void OcraTaskWidget::showTaskList()
 {
     getTaskList();
     if (taskNames.empty()) {
+        showUserInformation("No tasks found.");
         return;
     } else {
-        for (auto name : taskNames) {
-            QPushButton* btn = new QPushButton(tr(name.c_str()));
+        for (std::string name : taskNames) {
+            taskActivationVector.push_back(false);
+            std::cout << "Found task: " << name << std::endl;
+            QPushButton* btn = new QPushButton(name.c_str());
             if (taskRelayMap.find(name)!=taskRelayMap.end()) {
                 btn->setEnabled(false);
             }
+            buttonGroupLayout->addWidget(btn);
             taskButtons->addButton(btn);
         }
-        connect(taskButtons, SIGNAL(buttonClicked(int)),
-            this, SLOT(addTaskFrames(int)));
-        buttonFrame->show();
+        // buttonFrame->show();
         tasksDisplayed = true;
     }
 }
 void OcraTaskWidget::hideTaskList()
 {
 
-    buttonFrame->hide();
+    // buttonFrame->hide();
     tasksDisplayed = false;
 }
 
@@ -112,13 +115,22 @@ void OcraTaskWidget::getTaskList()
 
 void OcraTaskWidget::addTaskFrames(int taskIndex)
 {
+    // For some reason all the indexes in the button group are negative and start at -2...????
+    taskIndex = abs(taskIndex)-2;
+    std::cout << "Got task index " << taskIndex << std::endl;
     if ( (taskIndex < taskNames.size()) && (taskIndex >= 0) ) {
-        addTaskFrames(taskNames[taskIndex]);
+        if (!taskActivationVector[taskIndex]) {
+            addTaskFrames(taskNames[taskIndex]);
+            taskActivationVector[taskIndex] = true;
+        } else {
+            std::cout << "The " << taskNames[taskIndex] << " task frames are already added." << std::endl;
+        }
     }
 }
 
 void OcraTaskWidget::addTaskFrames(const std::string& taskName)
 {
+    std::cout << "Adding task frames for " << taskName << std::endl;
     std::string taskFrameName = taskName + "-Frame";
     double frameTransparency = 0.3;
     std::string taskTargetName = taskName + "-Target";
@@ -130,7 +142,7 @@ void OcraTaskWidget::addTaskFrames(const std::string& taskName)
     sdf::SDF targetModel = getFrameSdfModel(taskTargetName, targetTransparency);
     sendModelMsgToGazebo(targetModel);
 
-    TaskConnectionRelay relay(taskName);
+    std::shared_ptr<TaskConnectionRelay> relay = std::make_shared<TaskConnectionRelay>(taskName);
     taskRelayMap[taskName] = relay;
 }
 

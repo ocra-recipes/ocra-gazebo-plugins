@@ -6,72 +6,92 @@ TaskConnectionRelay::TaskConnectionRelay(const std::string& _taskName)
     taskCon = std::make_shared<ocra_recipes::TaskConnection>(taskName);
     taskCon->openControlPorts();
     taskType = taskCon->getTaskTypeAsString();
-    taskStatePortOutName = taskCon->getTaskOutputPortName();
+    // taskStatePortOutName = taskCon->getTaskOutputPortName();
+    yarp::os::Bottle reply;
+    taskCon->queryTask(ocra::TASK_MESSAGE::GET_CONTROL_PORT_NAMES, reply);
+    if(reply.size() == 3) {
+        taskStatePortOutName = reply.get(1).asString();
+        taskDesiredStatePortOutName = reply.get(2).asString();
+    }
 
-    framePortInName = "/"+taskName+"-Frame"+":i";
-    framePortOutName = "/"+taskName+"-Frame"+":o";
-    targetPortInName = "/"+taskName+"-Target"+":i";
-    targetPortOutName = "/"+taskName+"-Target"+":o";
+    framePortOutName = "/TaskConnectionRelay/"+taskName+"-Frame"+":o";
+    targetPortOutName = "/TaskConnectionRelay/"+taskName+"-Target"+":o";
+    framePortInName = "/Gazebo/"+taskName+"-Frame"+":i";
+    targetPortInName = "/Gazebo/"+taskName+"-Target"+":i";
 
-    taskStatePortInName = "/"+taskName+"/state:i";
+    taskStatePortInName = "/TaskConnectionRelay/"+taskName+"/state:i";
+    taskDesiredStatePortInName = "/TaskConnectionRelay/"+taskName+"/desired_state:i";
 
-    framePortOut.open(framePortOutName);
-    targetPortOut.open(targetPortOutName);
+    framePortOut = std::make_shared<yarp::os::Port>();
+    targetPortOut = std::make_shared<yarp::os::Port>();
+
+
+    framePortOut->open(framePortOutName);
+    targetPortOut->open(targetPortOutName);
     taskStateInPort.open(taskStatePortInName);
+    taskDesiredStateInPort.open(taskDesiredStatePortInName);
 
-    yarp.connect(framePortOutName, framePortInName);
-    yarp.connect(targetPortOutName, targetPortInName);
 
-    inputCallback = std::make_shared<InputCallback>(*this);
-    taskStateInPort.setReader(*inputCallback);
-    yarp.connect(taskStatePortOutName, taskStatePortInName);
+    while ( !yarp.connect(framePortOutName, framePortInName) ){yarp::os::Time::delay(0.01);}
+    while ( !yarp.connect(targetPortOutName, targetPortInName) ){yarp::os::Time::delay(0.01);}
+    while ( !yarp.connect(taskStatePortOutName, taskStatePortInName) ){yarp::os::Time::delay(0.01);}
+    while ( !yarp.connect(taskDesiredStatePortOutName, taskDesiredStatePortInName) ){yarp::os::Time::delay(0.01);}
+
+    inputStateCallback = std::make_shared<RelayCallback>(framePortOut);
+    taskStateInPort.setReader(*inputStateCallback);
+
+    inputDesiredStateCallback = std::make_shared<RelayCallback>(targetPortOut);
+    taskDesiredStateInPort.setReader(*inputDesiredStateCallback);
 }
 
 TaskConnectionRelay::~TaskConnectionRelay()
 {
-    framePortOut.close();
-    targetPortOut.close();
+    framePortOut->close();
+    targetPortOut->close();
+    taskStateInPort.close();
+    taskDesiredStateInPort.close();
 }
 
-void TaskConnectionRelay::sendPosesToGazebo()
-{
-    framePosition = currentFrameState.getPosition().getTranslation();
-    targetPosition = currentTargetState.getPosition().getTranslation();
-    for (int i=0; i<3; ++i) {
-        frameBottle.addDouble(framePosition(i));
-        targetBottle.addDouble(targetPosition(i));
-    }
-    framePortOut.write(frameBottle);
-    targetPortOut.write(targetBottle);
-}
-
-void TaskConnectionRelay::parseInput(yarp::os::Bottle& input)
-{
-    int dummy;
-    currentFrameState.extractFromBottle(input, dummy);
-    currentTargetState = taskCon->getDesiredTaskState();
-    sendPosesToGazebo();
-}
 
 /**************************************************************************************************
-                                    Nested PortReader Class
+                                    PortReader Class
 **************************************************************************************************/
-TaskConnectionRelay::InputCallback::InputCallback(TaskConnectionRelay& _tcRef)
-: tcRef(_tcRef)
+RelayCallback::RelayCallback(std::shared_ptr<yarp::os::Port> _relayPort)
+: relayPort(_relayPort)
 {
     //do nothing
 }
 
-bool TaskConnectionRelay::InputCallback::read(yarp::os::ConnectionReader& connection)
+RelayCallback::~RelayCallback()
 {
-    yarp::os::Bottle input;
-    if (input.read(connection)){
-        tcRef.parseInput(input);
+    // delete relayPort;
+}
+
+bool RelayCallback::read(yarp::os::ConnectionReader& connection)
+{
+    inputBottle.clear();
+    if (inputBottle.read(connection)){
+        state.extractFromBottle(inputBottle, dummyInt);
+        sendPoseToGazebo();
         return true;
     }
     else{
         return false;
     }
+}
+
+void RelayCallback::sendPoseToGazebo()
+{
+    outputBottle.clear();
+
+    displacementToXYZRPY(state.getPosition(), position);
+
+    for (auto i=0; i<position.size(); ++i) {
+        outputBottle.addDouble(position[i]);
+    }
+    // std::cout << "outputBottle: " << outputBottle.toString() << std::endl;
+    relayPort->write(outputBottle);
+    // return;
 }
 /**************************************************************************************************
 **************************************************************************************************/

@@ -14,5 +14,9 @@
     <include>
       <uri>model://ground_plane</uri>
     </include>
+    <!-- iCub -->
+    <include>
+        <uri>model://icub</uri>
+    </include>
   </world>
 </sdf>

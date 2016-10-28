@@ -33,6 +33,7 @@ class GAZEBO_VISIBLE OcraTaskWidget : public GUIPlugin
     public slots:
         void OnButton();
         void addTaskFrames(int taskIndex);
+        void reconnectRelays();
 
 
     private:
@@ -44,6 +45,8 @@ class GAZEBO_VISIBLE OcraTaskWidget : public GUIPlugin
         void hideTaskList();
         void addTaskFrames(const std::string& taskName);
         void getTaskList();
+
+
 
 
 
@@ -59,6 +62,7 @@ class GAZEBO_VISIBLE OcraTaskWidget : public GUIPlugin
         std::vector<bool> taskActivationVector;
 
         //GUI Related:
+        QHBoxLayout *topLayout;
         QLabel *informUserLabel;
         QButtonGroup* taskButtons;
         // QFrame* buttonFrame;

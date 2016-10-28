@@ -32,10 +32,7 @@ TaskConnectionRelay::TaskConnectionRelay(const std::string& _taskName)
     taskDesiredStateInPort.open(taskDesiredStatePortInName);
 
 
-    while ( !yarp.connect(framePortOutName, framePortInName) ){yarp::os::Time::delay(0.01);}
-    while ( !yarp.connect(targetPortOutName, targetPortInName) ){yarp::os::Time::delay(0.01);}
-    while ( !yarp.connect(taskStatePortOutName, taskStatePortInName) ){yarp::os::Time::delay(0.01);}
-    while ( !yarp.connect(taskDesiredStatePortOutName, taskDesiredStatePortInName) ){yarp::os::Time::delay(0.01);}
+    connect();
 
     inputStateCallback = std::make_shared<RelayCallback>(framePortOut);
     taskStateInPort.setReader(*inputStateCallback);
@@ -52,6 +49,15 @@ TaskConnectionRelay::~TaskConnectionRelay()
     taskDesiredStateInPort.close();
 }
 
+void TaskConnectionRelay::connect()
+{
+    taskCon->reconnect();
+    taskCon->openControlPorts();
+    while ( !yarp.connect(framePortOutName, framePortInName) ){yarp::os::Time::delay(0.01);}
+    while ( !yarp.connect(targetPortOutName, targetPortInName) ){yarp::os::Time::delay(0.01);}
+    while ( !yarp.connect(taskStatePortOutName, taskStatePortInName) ){yarp::os::Time::delay(0.01);}
+    while ( !yarp.connect(taskDesiredStatePortOutName, taskDesiredStatePortInName) ){yarp::os::Time::delay(0.01);}
+}
 
 /**************************************************************************************************
                                     PortReader Class

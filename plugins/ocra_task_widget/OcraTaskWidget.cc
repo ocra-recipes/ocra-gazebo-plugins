@@ -32,7 +32,7 @@ void OcraTaskWidget::initializeGui()
     this->setLayout(mainLayout);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    QHBoxLayout *topLayout = new QHBoxLayout();
+    topLayout = new QHBoxLayout();
     mainLayout->addLayout(topLayout);
     topLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -92,10 +92,25 @@ void OcraTaskWidget::showTaskList()
             buttonGroupLayout->addWidget(btn);
             taskButtons->addButton(btn);
         }
+        QPushButton *button = new QPushButton(tr("Reconnect"));
+        // button->resize(60, 30);
+        connect(button, SIGNAL(clicked()), this, SLOT(reconnectRelays()));
+        topLayout->addWidget(button);
         // buttonFrame->show();
         tasksDisplayed = true;
     }
 }
+
+void OcraTaskWidget::reconnectRelays()
+{
+    for (int i=0; i<taskNames.size(); ++i) {
+        if(taskActivationVector[i]) {
+            std::cout << "Reconnecting " << taskNames[i] << std::endl;
+            taskRelayMap[taskNames[i]]->connect();
+        }
+    }
+}
+
 void OcraTaskWidget::hideTaskList()
 {
 

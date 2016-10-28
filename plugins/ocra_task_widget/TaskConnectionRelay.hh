@@ -96,26 +96,12 @@ private:
     std::string taskDesiredStatePortInName;
     yarp::os::Port taskDesiredStateInPort;
 
-    // ocra::TaskState currentFrameState;
-    // ocra::TaskState currentTargetState;
-    //
-    // std::vector<double> framePosition;
-    // std::vector<double> targetPosition;
-    //
-    // yarp::os::Bottle frameBottle;
-    // yarp::os::Bottle targetBottle;
-
-private:
-    // void sendPosesToGazebo();
-
 
 public:
     TaskConnectionRelay(const std::string& _taskName);
     ~TaskConnectionRelay();
-    // void parseInput(yarp::os::Bottle& input);
 
-
-
+    void connect();
 
 
 private:

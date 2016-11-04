@@ -56,8 +56,9 @@ public:
 
 private:
     void addSdfToWorld(const sdf::SDF& sphereSDF);
-    void addTaskFrames(const std::string& taskName);
-    void removeTaskFrames(const std::string& taskName);
+    void addTaskFrames(const std::string& taskName, bool& worked, std::string& message);
+    void removeTaskFrames(const std::string& taskName, bool& worked, std::string& message);
+    void removeTaskNameFromList(const std::string& taskName);    
     bool checkIfTaskFramesExist(const std::string& taskName);
     void sendModelMsgToGazebo(const sdf::SDF& sdfModel);
     sdf::SDF getFrameSdfModel(const std::string& frameName, double transparencyValue);

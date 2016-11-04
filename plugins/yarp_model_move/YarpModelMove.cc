@@ -32,6 +32,7 @@ public:
 
     void OnUpdate(const common::UpdateInfo & )
     {
+        yarp::os::Bottle *b;
         b = port.read(false);
         if (b!=NULL)
         {
@@ -62,7 +63,7 @@ private:
     event::ConnectionPtr updateConnection;
 
     yarp::os::BufferedPort<yarp::os::Bottle> port;
-    yarp::os::Bottle *b;
+
 
 };
 

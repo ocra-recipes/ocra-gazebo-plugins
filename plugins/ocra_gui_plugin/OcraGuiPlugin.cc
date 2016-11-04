@@ -22,16 +22,18 @@ void OcraGuiPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr)
 
 void OcraGuiPlugin::parseInputAndReply(const yarp::os::Bottle& in, yarp::os::Bottle& out)
 {
+    bool worked = true;
+    std::string message = "";
     std::string tag = in.get(0).asString();
     if (tag=="addTaskFrames") {
-        std::string taskName = in.get(1).asString();
-        addTaskFrames(taskName);
-        out.addInt(true);
+        addTaskFrames(in.get(1).asString(), worked, message);
     } else if (tag=="removeTaskFrames") {
-        out.addInt(false);
+        removeTaskFrames(in.get(1).asString(), worked, message);
     } else {
-        out.addInt(false);
+        // out.addInt(false);
     }
+    out.addInt(worked);
+    out.addString(message);
 }
 
 void OcraGuiPlugin::addSdfToWorld(const sdf::SDF& sphereSDF)
@@ -39,13 +41,12 @@ void OcraGuiPlugin::addSdfToWorld(const sdf::SDF& sphereSDF)
     this->world->InsertModelSDF(sphereSDF);
 }
 
-void OcraGuiPlugin::addTaskFrames(const std::string& taskName)
+void OcraGuiPlugin::addTaskFrames(const std::string& taskName, bool& worked, std::string& message)
 {
     if (checkIfTaskFramesExist(taskName)) {
-        std::cout << "Task frames for " << taskName << " are already in the gazebo world." << std::endl;
-        return;
+        message = "Task frames for " + taskName + " are already in the gazebo world.";
+        worked = false;
     } else {
-        std::cout << "Adding task frames for " << taskName << std::endl;
         std::string taskFrameName = taskName + "-Frame";
         double frameTransparency = 0.3;
         std::string taskTargetName = taskName + "-Target";
@@ -57,19 +58,37 @@ void OcraGuiPlugin::addTaskFrames(const std::string& taskName)
         sdf::SDF targetModel = getFrameSdfModel(taskTargetName, targetTransparency);
         addSdfToWorld(targetModel);
         taskFramesActiveInWorld.push_back(taskName);
+
+        message = "Added task frames for " + taskName;
+        worked = true;
     }
 }
 
-void OcraGuiPlugin::removeTaskFrames(const std::string& taskName)
+void OcraGuiPlugin::removeTaskFrames(const std::string& taskName, bool& worked, std::string& message)
 {
     if (checkIfTaskFramesExist(taskName)) {
-        std::cout << "Task frames for " << taskName << " will be removed." << std::endl;
-        return;
+        std::string taskFrameName = taskName + "-Frame";
+        std::string taskTargetName = taskName + "-Target";
+        this->world->RemoveModel(taskFrameName);
+        this->world->RemoveModel(taskTargetName);
+        removeTaskNameFromList(taskName);
+        message = "Removed task frames for " + taskName;
+        worked = true;
     } else {
-        std::cout << "Task frames for " << taskName << " do not exist." << std::endl;
-        return;
+        message = "Task frames for " + taskName + " do not exist.";
+        worked = false;
     }
 }
+
+void OcraGuiPlugin::removeTaskNameFromList(const std::string& taskName)
+{
+    for (int i=0; i<taskFramesActiveInWorld.size(); ++i) {
+        if (taskFramesActiveInWorld[i]==taskName) {
+            taskFramesActiveInWorld.erase(taskFramesActiveInWorld.begin()+i);
+        }
+    }
+}
+
 
 bool OcraGuiPlugin::checkIfTaskFramesExist(const std::string& taskName)
 {

@@ -62,6 +62,8 @@ private:
     bool checkIfTaskFramesExist(const std::string& taskName);
     void sendModelMsgToGazebo(const sdf::SDF& sdfModel);
     sdf::SDF getFrameSdfModel(const std::string& frameName, double transparencyValue);
+    void getRobotWorldPose();
+
 
 private:
     physics::WorldPtr world;
@@ -69,6 +71,7 @@ private:
     yarp::os::RpcServer port;
     std::vector<std::string> taskFramesActiveInWorld;
     RpcServerCallback callback;
+    math::Pose robotWorldPose;
 };
 
 // Register this plugin with the simulator

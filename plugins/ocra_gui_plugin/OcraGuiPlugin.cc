@@ -18,6 +18,23 @@ void OcraGuiPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr)
     port.open("/Gazebo/OcraGuiPlugin/rpc:i");
     callback = RpcServerCallback(this);
     port.setReader(callback);
+
+    robotWorldPose = math::Pose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    getRobotWorldPose();
+}
+
+void OcraGuiPlugin::getRobotWorldPose()
+{
+    if (this->world->GetModel("iCub")) {
+        if (this->world->GetModel("iCub")->GetChildLink("l_foot")) {
+            robotWorldPose = this->world->GetModel("iCub")->GetChildLink("l_foot")->GetWorldPose();
+            std::cout << "Found iCub.l_foot. Getting robot world pose from this link." << std::endl;
+        }
+    }
+    std::cout << "=========================================" << std::endl;
+    std::cout << "-- OcraGuiPlugin --" << std::endl;
+    std::cout << "Robot world pose:\n" << robotWorldPose << std::endl;
+    std::cout << "=========================================" << std::endl;
 }
 
 void OcraGuiPlugin::parseInputAndReply(const yarp::os::Bottle& in, yarp::os::Bottle& out)
@@ -29,7 +46,23 @@ void OcraGuiPlugin::parseInputAndReply(const yarp::os::Bottle& in, yarp::os::Bot
         addTaskFrames(in.get(1).asString(), worked, message);
     } else if (tag=="removeTaskFrames") {
         removeTaskFrames(in.get(1).asString(), worked, message);
-    } else {
+    } else if (tag=="getRobotWorldPose") {
+        double x = robotWorldPose.pos.x;
+        double y = robotWorldPose.pos.y;
+        double z = robotWorldPose.pos.z;
+        double qw = robotWorldPose.rot.w;
+        double qx = robotWorldPose.rot.x;
+        double qy = robotWorldPose.rot.y;
+        double qz = robotWorldPose.rot.z;
+        out.addDouble(x);
+        out.addDouble(y);
+        out.addDouble(z);
+        out.addDouble(qw);
+        out.addDouble(qx);
+        out.addDouble(qy);
+        out.addDouble(qz);
+        message = "Robot world frame has the following coordinates relative to the Gazebo world frame: " + std::to_string(x) +", "+ std::to_string(y) +", "+ std::to_string(z) +", "+ std::to_string(qw) +", "+ std::to_string(qx) +", "+ std::to_string(qy) +", "+ std::to_string(qz) + ".";
+    }else {
         // out.addInt(false);
     }
     out.addInt(worked);

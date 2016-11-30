@@ -36,9 +36,9 @@ void OcraGuiPlugin::parseInputAndReply(const yarp::os::Bottle& in, yarp::os::Bot
     out.addString(message);
 }
 
-void OcraGuiPlugin::addSdfToWorld(const sdf::SDF& sphereSDF)
+void OcraGuiPlugin::addSdfToWorld(const sdf::SDF& modelSDF)
 {
-    this->world->InsertModelSDF(sphereSDF);
+    this->world->InsertModelSDF(modelSDF);
 }
 
 void OcraGuiPlugin::addTaskFrames(const std::string& taskName, bool& worked, std::string& message)

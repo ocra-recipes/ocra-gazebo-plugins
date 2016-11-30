@@ -55,7 +55,7 @@ public:
     };
 
 private:
-    void addSdfToWorld(const sdf::SDF& sphereSDF);
+    void addSdfToWorld(const sdf::SDF& modelSDF);
     void addTaskFrames(const std::string& taskName, bool& worked, std::string& message);
     void removeTaskFrames(const std::string& taskName, bool& worked, std::string& message);
     void removeTaskNameFromList(const std::string& taskName);    

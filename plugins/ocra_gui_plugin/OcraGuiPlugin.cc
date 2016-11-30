@@ -107,7 +107,7 @@ sdf::SDF OcraGuiPlugin::getFrameSdfModel(const std::string& frameName, double tr
         "<?xml version='1.0'?>\
         <sdf version='1.4'>\
         <model name='"+frameName+"'>\
-            <pose>0 0 0.5 0 0 0</pose>\
+            <pose>0 0 0 0 0 0</pose>\
             <static>false</static>\
             <link name='origin'>\
                 <gravity>false</gravity>\

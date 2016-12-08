@@ -54,7 +54,7 @@ public:
                                                         b->get(5).asDouble()));
             } else if (b->size()==7) {
                 math::Vector3 pos(b->get(0).asDouble(), b->get(1).asDouble(), b->get(2).asDouble());
-                math::Quaternion rot(b->get(3).asDouble(), b->get(4).asDouble(), b->get(5).asDouble(), b->get(7).asDouble());
+                math::Quaternion rot(b->get(3).asDouble(), b->get(4).asDouble(), b->get(5).asDouble(), b->get(6).asDouble());
                 this->model->SetWorldPose(math::Pose(pos, rot));
             }
         }

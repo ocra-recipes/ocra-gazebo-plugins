@@ -56,7 +56,7 @@ private:
     std::string _cameraName;
     std::string _imageSaveDir;
     std::string _saveDir;
-
+    std::string _videoName;
     std::string _rpcServerPortName;
     yarp::os::RpcServer _rpcServer;
     yarp::os::Network _yarp;

@@ -191,7 +191,7 @@ void YarpCameraControl::createImageSaveDir(const std::string& newImageSaveDir)
         if ( !boost::filesystem::is_empty(newDir) ) {
             std::cout << "WARNING: Overwriting images in " << newDir << ". Old data will be lost." << '\n';
 
-            boost::filesystem::recursive_directory_iterator rdi(dir);
+            boost::filesystem::recursive_directory_iterator rdi(newDir);
             boost::filesystem::recursive_directory_iterator end_rdi;
             std::string extension(".png");
             for (; rdi != end_rdi; ++rdi) {
@@ -212,7 +212,7 @@ void YarpCameraControl::createImageSaveDir(const std::string& newImageSaveDir)
 
 void YarpCameraControl::parseGetPoseMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out)
 {
-    auto pose = _cameraSensor.Pose();
+    auto pose = _cameraSensor->Pose();
     auto pos = pose.Pos();
     auto rot = pose.Rot().Euler();
     out.addDouble(pos[0]); // x
@@ -238,12 +238,12 @@ void YarpCameraControl::parseSetResolutionMessage(const yarp::os::Bottle& in, ya
         out.addInt(FAILURE);
         return;
     }
-    camera->SetImageSize(width, height);
-    if ( (width == camera->GetImageWidth()) && (height == camera->GetImageHeight()) ) {
+    _camera->SetImageSize(width, height);
+    if ( (width == _camera->GetImageWidth()) && (height == _camera->GetImageHeight()) ) {
         out.addInt(SUCCESS);
         out.addInt(width);
         out.addInt(height);
-        std::cout << "Recording video in " << width << " x " << height " resolution." << '\n';
+        std::cout << "Recording video in " << width << " x " << height << " resolution." << '\n';
     } else {
         out.addInt(FAILURE);
         std::cout << "Failed to set new resolution." << '\n';

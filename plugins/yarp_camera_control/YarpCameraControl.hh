@@ -7,18 +7,19 @@
 #include <gazebo/sensors/sensors.hh>
 #include <gazebo/rendering/rendering.hh>
 
+#include <boost/filesystem.hpp>
+
 #include <yarp/os/all.h>
 
 namespace gazebo
 {
-
-
 /// \brief An example plugin for a camera sensor.
 class YarpCameraControl : public SensorPlugin
 {
 public:
     /// \brief Constructor.
     YarpCameraControl();
+
     /// \brief Destructor.
     virtual ~YarpCameraControl();
 
@@ -33,13 +34,13 @@ public:
     void parseAndReply(const yarp::os::Bottle& in, yarp::os::Bottle& out);
 
 
-    class RpcCallback : public yarp::os::PortReader {
-
-    public:
-        RpcCallback(YarpCameraControl* camCtrl);
-        virtual bool read(yarp::os::ConnectionReader& connection);
-    private:
-        YarpCameraControl* _camCtrl;
+    class RpcCallback : public yarp::os::PortReader
+    {
+        public:
+            RpcCallback(YarpCameraControl* camCtrl);
+            virtual bool read(yarp::os::ConnectionReader& connection);
+        private:
+            YarpCameraControl* _camCtrl;
     };
 
 private:
@@ -52,7 +53,9 @@ private:
     event::ConnectionPtr _updateConnection;
 
 
-    std::string _imageSavePath;
+    std::string _cameraName;
+    std::string _imageSaveDir;
+    std::string _saveDir;
 
     std::string _rpcServerPortName;
     yarp::os::RpcServer _rpcServer;
@@ -60,13 +63,26 @@ private:
     RpcCallback* _callback;
     bool _isRecording;
     double _recordStartTime;
+    int _recordingNumber;
 
+
+    const static int SUCCESS = 1;
+    const static int FAILURE = 0;
 
 private:
     std::string getFrameFilename();
     bool startRecording();
     bool stopRecording();
     void generateVideoFromImages();
+
+    void parseRecordMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
+    void setSaveDir(const std::string& newSaveDir);
+    void setVideoName(const std::string& newVideoName);
+    void createImageSaveDir(const std::string& newImageSaveDir);
+    void parseGetPoseMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
+    void parseSetResolutionMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
+    void parseHelpMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
+
 };
 }
 #endif

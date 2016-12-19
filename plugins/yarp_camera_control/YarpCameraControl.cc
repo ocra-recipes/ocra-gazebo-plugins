@@ -50,7 +50,7 @@ void YarpCameraControl::Load(sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*
     _cameraSensor->SetActive(true);
     _cameraName = _cameraSensor->Name();
 
-    _rpcServerPortName = "/gazebo/"+ _cameraName +"/rpc:i";
+    _rpcServerPortName = "/Gazebo/"+ _cameraName +"/rpc:i";
     _rpcServer.open(_rpcServerPortName);
     _callback = new RpcCallback(this);
     _rpcServer.setReader(*_callback);

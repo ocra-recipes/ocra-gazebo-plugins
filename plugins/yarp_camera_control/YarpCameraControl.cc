@@ -39,8 +39,7 @@ void YarpCameraControl::Load(sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*
     }
 
 
-    _camera = _cameraSensor->GetCamera();
-    _camera->EnableSaveFrame(true);
+    _camera = _cameraSensor->Camera();
 
     // Connect to the sensor update event.
     _updateConnection = _cameraSensor->ConnectUpdated(std::bind(&YarpCameraControl::OnUpdate, this));
@@ -212,7 +211,7 @@ void YarpCameraControl::createImageSaveDir(const std::string& newImageSaveDir)
 
 void YarpCameraControl::parseGetPoseMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out)
 {
-    auto pose = _cameraSensor->Pose();
+    auto pose = _camera->WorldPose();
     auto pos = pose.Pos();
     auto rot = pose.Rot().Euler();
     out.addDouble(pos[0]); // x
@@ -239,7 +238,7 @@ void YarpCameraControl::parseSetResolutionMessage(const yarp::os::Bottle& in, ya
         return;
     }
     _camera->SetImageSize(width, height);
-    if ( (width == _camera->GetImageWidth()) && (height == _camera->GetImageHeight()) ) {
+    if ( (width == _camera->ImageWidth()) && (height == _camera->ImageHeight()) ) {
         out.addInt(SUCCESS);
         out.addInt(width);
         out.addInt(height);

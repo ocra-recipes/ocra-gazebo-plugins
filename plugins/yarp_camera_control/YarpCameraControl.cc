@@ -106,7 +106,28 @@ bool YarpCameraControl::stopRecording()
 
 void YarpCameraControl::generateVideoFromImages()
 {
+    auto fps = std::to_string((int)std::round(_camera->AvgFPS()));
+    auto width = std::to_string(_camera->ImageWidth());
+    auto height = std::to_string(_camera->ImageHeight());
 
+    auto frameArgs          = " -framerate " + fps;
+    auto inputArgs          = " -i " + _imageSaveDir + "/image-%0" + std::to_string(ZERO_PADDING) + "d" +_imageExt;
+    auto resArgs            = " -s " + width + "x" + height;
+    auto overwriteArgs      = " -y";
+    auto outputArgs         = " " + _saveDir + "/" +_videoName;
+    auto nonBlockingArgs    = " & ";
+    auto pixFormatArgs      = "";
+
+    // http://superuser.com/questions/533695/how-can-i-convert-a-series-of-png-images-to-a-video-for-youtube#answers-header
+    if ((_imageExt == ".png") && (_videoExt == ".mp4")) {
+        pixFormatArgs = " -pix_fmt yuv420p";
+    }
+
+    auto args = "ffmpeg" + frameArgs + inputArgs + resArgs + overwriteArgs + pixFormatArgs + outputArgs + nonBlockingArgs;
+
+    std::cout << "Generating video with the following arguments:\n" << args << std::endl;
+
+    int uselessInt = system(args.c_str());
 }
 
 void YarpCameraControl::parseAndReply(const yarp::os::Bottle& in, yarp::os::Bottle& out)

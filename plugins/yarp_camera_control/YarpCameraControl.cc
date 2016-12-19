@@ -23,6 +23,8 @@ YarpCameraControl::~YarpCameraControl()
 void YarpCameraControl::Load(sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*/)
 {
     _recordingNumber = 0;
+    _videoExt = ".mp4";
+    _imageExt = ".jpg";
 
 
     _isRecording = false;
@@ -107,6 +109,10 @@ void YarpCameraControl::parseAndReply(const yarp::os::Bottle& in, yarp::os::Bott
         parseGetPoseMessage(in, out);
     } else if ( tag == "set_resolution" ) {
         parseSetResolutionMessage(in, out);
+    } else if ( tag == "set_video_format" ) {
+        parseSetVideoFormatMessage(in, out);
+    } else if ( tag == "set_still_format" ) {
+        parseSetStillFormatMessage(in, out);
     } else if ( tag == "help" ) {
         parseHelpMessage(in, out);
     } else {
@@ -173,9 +179,8 @@ void YarpCameraControl::setSaveDir(const std::string& newSaveDir)
 void YarpCameraControl::setVideoName(const std::string& newVideoName)
 {
     _videoName = newVideoName;
-    std::string extension(".mp4");
-    if ( newVideoName.find(extension) == std::string::npos ) {
-        _videoName += extension;
+    if ( newVideoName.find(_videoExt) == std::string::npos ) {
+        _videoName += _videoExt;
     }
     createImageSaveDir( _videoName.substr( 0, _videoName.size()-4 ) );
 }
@@ -249,6 +254,37 @@ void YarpCameraControl::parseSetResolutionMessage(const yarp::os::Bottle& in, ya
     }
 
 }
+
+void YarpCameraControl::parseSetVideoFormatMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out)
+{
+    auto newFormat = in.get(1).asString();
+    std::transform(newFormat.begin(), newFormat.end(), newFormat.begin(), ::tolower);
+    if ( (newFormat=="mp4") || (newFormat=="webm") ) {
+        _videoExt = "." + newFormat;
+        out.addInt(SUCCESS);
+        out.addString(_videoExt);
+        std::cout << "Videos shall be encoded in the " << _videoExt << " format." << std::endl;
+    } else {
+        out.addInt(FAILURE);
+        std::cout << "WARNING: Unable to change video format to " << newFormat << ". Valid options are: mp4, and webm."<< std::endl;
+    }
+}
+
+void YarpCameraControl::parseSetStillFormatMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out)
+{
+    auto newFormat = in.get(1).asString();
+    std::transform(newFormat.begin(), newFormat.end(), newFormat.begin(), ::tolower);
+    if ( (newFormat=="jpg") || (newFormat=="png") ) {
+        _imageExt = "." + newFormat;
+        out.addInt(SUCCESS);
+        out.addString(_imageExt);
+        std::cout << "Still images shall be encoded in the " << _imageExt << " format." << std::endl;
+    } else {
+        out.addInt(FAILURE);
+        std::cout << "WARNING: Unable to change still image format to " << newFormat << ". Valid options are: jpg, and png."<< std::endl;
+    }
+}
+
 void YarpCameraControl::parseHelpMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out)
 {
 

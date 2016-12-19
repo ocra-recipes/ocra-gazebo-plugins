@@ -62,24 +62,33 @@ void YarpCameraControl::Load(sensors::SensorPtr _sensor, sdf::ElementPtr /*_sdf*
 void YarpCameraControl::OnUpdate()
 {
     if(_isRecording) {
-        auto filename = this->getFrameFilename();
-        _camera->SaveFrame(filename);
+        _camera->SaveFrame(getFrameFilename());
     }
 }
 /////////////////////////////////////////////////
 
 std::string YarpCameraControl::getFrameFilename()
 {
-    auto seconds_elapsed = yarp::os::Time::now() - _recordStartTime;
-    return _imageSaveDir + "/" + std::to_string(seconds_elapsed) + ".png";
+    _relativeRecordingTime = yarp::os::Time::now() - _recordStartTime;
+    std::string frameName{"image-"};
+    // TODO: Add timestamp to the frames - can't get it to work with ffmpeg command yet.
+    // std::string frameName{"image-" + std::to_string(_relativeRecordingTime) + "-"};
+    std::stringstream fcStream;
+    fcStream << std::setfill ('0') << std::setw (ZERO_PADDING) << _frameCount;
+    frameName += fcStream.str();
+
+    ++_frameCount;
+    return _imageSaveDir + "/" + frameName + _imageExt;
 }
 
 bool YarpCameraControl::startRecording()
 {
     if(!_isRecording) {
         _recordStartTime = yarp::os::Time::now();
+        _relativeRecordingTime = 0.0;
         _isRecording = true;
         ++_recordingNumber;
+        _frameCount = 0;
         return true;
     }
     return false;
@@ -124,18 +133,19 @@ void YarpCameraControl::parseRecordMessage(const yarp::os::Bottle& in, yarp::os:
 {
     if ( in.size() >= 2 ) {
         bool start = in.get(1).asBool();
-        if ( in.size() >= 3 ) {
-            setSaveDir( in.get(2).asString() );
-            if ( in.size() == 4 ) {
-                setVideoName( in.get(3).asString() );
-            } else {
-                setVideoName(_cameraName + std::to_string(_recordingNumber));
-            }
-        } else {
-            setSaveDir(boost::filesystem::current_path().string());
-            setVideoName(_cameraName + std::to_string(_recordingNumber));
-        }
         if( start ) {
+            if ( in.size() >= 3 ) {
+                setSaveDir( in.get(2).asString() );
+                if ( in.size() == 4 ) {
+                    setVideoName( in.get(3).asString() );
+                } else {
+                    setVideoName(_cameraName + "_" + std::to_string(_recordingNumber));
+                }
+            } else {
+                setSaveDir(boost::filesystem::current_path().string());
+                setVideoName(_cameraName + "_" + std::to_string(_recordingNumber));
+            }
+
             if( startRecording() ) {
                 out.addInt(SUCCESS);
                 out.addString(_saveDir);

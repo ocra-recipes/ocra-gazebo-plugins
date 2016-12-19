@@ -2,6 +2,9 @@
 #define _GAZEBO_CONTACT_PLUGIN_HH_
 
 #include <string>
+#include <sstream>
+#include <cstdlib>
+#include <algorithm>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/sensors/sensors.hh>
@@ -63,11 +66,18 @@ private:
     RpcCallback* _callback;
     bool _isRecording;
     double _recordStartTime;
+    double _relativeRecordingTime;
     int _recordingNumber;
+    int _frameCount;
+    std::string _videoExt;
+    std::string _imageExt;
+
 
 
     const static int SUCCESS = 1;
     const static int FAILURE = 0;
+
+    const static int ZERO_PADDING = 10;
 
 private:
     std::string getFrameFilename();
@@ -81,6 +91,8 @@ private:
     void createImageSaveDir(const std::string& newImageSaveDir);
     void parseGetPoseMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
     void parseSetResolutionMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
+    void parseSetVideoFormatMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
+    void parseSetStillFormatMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
     void parseHelpMessage(const yarp::os::Bottle& in, yarp::os::Bottle& out);
 
 };

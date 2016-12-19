@@ -189,6 +189,7 @@ void YarpCameraControl::parseRecordMessage(const yarp::os::Bottle& in, yarp::os:
                 std::cout << "Files saved to: " << _saveDir << '\n';
                 std::cout << "Stills saved to: " << _imageSaveDir << '\n';
                 std::cout << "Video title: " << _videoName << '\n';
+                std::cout << "Total recording time: " << _relativeRecordingTime << " seconds" << std::endl;
             } else {
                 out.addInt(FAILURE);
             }

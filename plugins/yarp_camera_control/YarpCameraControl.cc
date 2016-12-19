@@ -227,11 +227,10 @@ void YarpCameraControl::createImageSaveDir(const std::string& newImageSaveDir)
         if ( !boost::filesystem::is_empty(newDir) ) {
             std::cout << "WARNING: Overwriting images in " << newDir << ". Old data will be lost." << '\n';
 
-            boost::filesystem::recursive_directory_iterator rdi(newDir);
-            boost::filesystem::recursive_directory_iterator end_rdi;
-            std::string extension(".png");
+            boost::filesystem::directory_iterator rdi(newDir);
+            boost::filesystem::directory_iterator end_rdi;
             for (; rdi != end_rdi; ++rdi) {
-                if (extension.compare(rdi->path().extension().string()) == 0) {
+                if (_imageExt.compare(rdi->path().extension().string()) == 0) {
                     try {
                         if( boost::filesystem::is_regular_file(rdi->status()) ) {
                             boost::filesystem::remove(rdi->path());

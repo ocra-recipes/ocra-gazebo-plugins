@@ -46,6 +46,10 @@ void OcraGuiPlugin::parseInputAndReply(const yarp::os::Bottle& in, yarp::os::Bot
         addTaskFrames(in.get(1).asString(), worked, message);
     } else if (tag=="removeTaskFrames") {
         removeTaskFrames(in.get(1).asString(), worked, message);
+    } else if (tag=="addSdfToWorld"){
+        sdf::SDF modelSdf;
+        modelSdf.SetFromString(in.get(1).asString());
+        addSdfToWorld(modelSdf);
     } else if (tag=="getRobotWorldPose") {
         double x = robotWorldPose.pos.x;
         double y = robotWorldPose.pos.y;
